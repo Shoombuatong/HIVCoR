@@ -24,7 +24,7 @@ AAC4 <-AAC2[!duplicated(AAC2), ]
 
 label =  c(rep("R5",nrow(AAC3)),rep("X4",nrow(AAC4)))
 internal = data.frame(rbind(AAC3,AAC4),Class = label)
-AUC <- matrix(nrow = 5, ncol = 1)
+AUC <- matrix(nrow = 10, ncol = 1)
 
 ######### Optimized parameter
 SVMpara = tune(svm, Class ~ ., data =internal, ranges =list(gamma = 2^(-8:8), cost = 2^(-8:8)),
