@@ -1,0 +1,57 @@
+#######set directory
+setwd('D:\\CRF_01AE')
+#######Load package
+library(randomForest)
+library(kernlab)
+library(e1071)
+library(randomForest)
+library(protr)
+library(seqinr)
+library(AUC)
+library(ROCR)
+library(RWeka)
+library(caret)
+
+######### Extract feature
+x1 <- read.fasta('CCR5 AA.fasta', seqtype="AA", as.string = TRUE)
+x2 <- read.fasta('CXCR4 AA.fasta', seqtype="AA", as.string = TRUE)
+x1 <- x1[(sapply(x1, protcheck))]
+x2 <- x2[(sapply(x2, protcheck))]
+AAC1 <- t(sapply(x1, extractAAC))
+AAC2 <- t(sapply(x2, extractAAC))
+AAC3 <-AAC1[!duplicated(AAC1), ]
+AAC4 <-AAC2[!duplicated(AAC2), ]
+
+label =  c(rep("R5",nrow(AAC3)),rep("X4",nrow(AAC4)))
+data = data.frame(rbind(AAC3,AAC4),Class = label)
+
+meanX  <- matrix(nrow = ncol(data), ncol = 1)
+sdX  <- matrix(nrow = ncol(data), ncol = 1)
+meanY  <- matrix(nrow = ncol(data), ncol = 1)
+sdY  <- matrix(nrow = ncol(data), ncol = 1)
+p.value  <- matrix(nrow = ncol(data), ncol = 1)
+m = ncol(data)
+k = m-1
+
+for(i in 1:k){ 
+	X <- subset(data.frame(data[,i],Class =data[,m]), Class == 'R5')
+	Y <- subset(data.frame(data[,i],Class =data[,m]), Class == 'X4')
+	meanX[i,]  = mean(as.numeric(X[,1]))
+	sdX[i,]  = sd(as.numeric(X[,1]))
+	meanY[i,]  = mean(as.numeric(Y[,1]))
+	sdY[i,]  = sd(as.numeric(Y[,1]))
+	p.value[i,]  = t.test(as.numeric(X[,1]),as.numeric(Y[,1]))$ p.value
+}
+
+stat = data.frame (meanX,sdX,meanY,sdY,p.value)
+
+######### MDGI
+internal = data
+ind= c(2,3,5,7,9,11,13,15,17,20)
+n = ncol(internal)-1
+gini = matrix(nrow = n, ncol = 10)
+
+for (i in 1:10){
+RF<-randomForest(Class~.,data=internal,ntree=100,mtry=ind[i],importance=TRUE)
+gini[,i] = as.matrix(importance(RF)[,1])
+}
