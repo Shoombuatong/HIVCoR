@@ -32,7 +32,7 @@ codonX4_1 <-codonX4[!duplicated(codonX4), ]
 
 label =  c(rep("R5",nrow(codonR5_1)),rep("X4",nrow(codonX4_1)))
 internal = data.frame(rbind(codonR5_1,codonX4_1),Class = label)
-AUC <- matrix(nrow = 5, ncol = 1)
+AUC <- matrix(nrow = 10, ncol = 1)
 
 ######### Optimized parameter
 SVMpara = tune(svm, Class ~ ., data =internal, ranges =list(gamma = 2^(-8:8), cost = 2^(-8:8)),
