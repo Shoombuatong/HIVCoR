@@ -17,7 +17,7 @@ x1 <- read.fasta('CCR5 AA.fasta', seqtype="AA", as.string = TRUE)
 x2 <- read.fasta('CXCR4 AA.fasta', seqtype="AA", as.string = TRUE)
 x1 <- x1[(sapply(x1, protcheck))]
 x2 <- x2[(sapply(x2, protcheck))]
-AUC <- matrix(nrow = 5, ncol = 1)
+AUC <- matrix(nrow = 10, ncol = 1)
 
 col = 20+ 30
 PAAC1  <- matrix(nrow = length(x1), ncol = col)
@@ -35,7 +35,7 @@ PAAC4 <-PAAC2[!duplicated(PAAC2), ]
 
 label =  c(rep("R5",nrow(PAAC3)),rep("X4",nrow(PAAC4)))
 internal = data.frame(rbind(PAAC3,PAAC4),Class = label)
-AUC <- matrix(nrow = 5, ncol = 1)
+AUC <- matrix(nrow = 10, ncol = 1)
 
 ######### Optimized parameter
 SVMpara = tune(svm, Class ~ ., data =internal, ranges =list(gamma = 2^(-8:8), cost = 2^(-8:8)),
