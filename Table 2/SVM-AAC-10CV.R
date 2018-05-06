@@ -31,7 +31,7 @@ SVMpara = tune(svm, Class ~ ., data =internal, ranges =list(gamma = 2^(-8:8), co
 tunecontrol = tune.control(sampling = "fix"))
 
 ################### 10-fold CV
-k <- 5;
+k <- 10;
 Resultcv <- 0;
 folds <- cvsegments(nrow(internal), k);
 for (fold in 1:k){
