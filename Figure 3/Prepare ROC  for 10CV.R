@@ -140,5 +140,105 @@ labelcv = label[,2]
 
 RF_rscu = cbind(probcv,labelcv)
 
+########################### SVM-AAC
+x1 <- read.fasta('CCR5 AA.fasta', seqtype="AA", as.string = TRUE)
+x2 <- read.fasta('CXCR4 AA.fasta', seqtype="AA", as.string = TRUE)
+x1 <- x1[(sapply(x1, protcheck))]
+x2 <- x2[(sapply(x2, protcheck))]
+AAC1 <- t(sapply(x1, extractAAC))
+AAC2 <- t(sapply(x2, extractAAC))
+AAC3 <-AAC1[!duplicated(AAC1), ]
+AAC4 <-AAC2[!duplicated(AAC2), ]
+label =  c(rep("R5",nrow(AAC3)),rep("X4",nrow(AAC4)))
+internal = data.frame(rbind(AAC3,AAC4),Class = label)
+SVMpara = tune(svm, Class ~ ., data =internal, ranges =list(gamma = 2^(-8:8), cost = 2^(-8:8)),
+tunecontrol = tune.control(sampling = "fix"))
 
+######Loop for 10-fold CV
+k <- 10;
+folds <- cvsegments(nrow(internal), k);
+true <- data.frame()
+label <- data.frame()
+
+for (fold in 1:k){
+  currentFold <- folds[fold][[1]];
+  RF = ksvm(Class~.,data=internal[-currentFold,],kernel="rbfdot", cost = as.numeric(SVMpara$ best.parameters[1]), gamma = as.numeric(SVMpara$ best.parameters[1]),prob.model=TRUE)
+  true = rbind(true, predict(RF, internal[currentFold,],type="prob")[,2])
+  label = rbind(label, internal[currentFold,]$Class)
+  }
+probcv = data.frame(melt(true)[2])
+labelcv = label[,2]
+SVM_aac = cbind(data.frame(melt(true)[2]),label[,2])
+########################### SVM-PseAAC
+col = 20+ 30
+PAAC1  <- matrix(nrow = length(x1), ncol = col)
+for (i in 1:length(x1)){
+PAAC1[i,] = extractPAAC(x1[[i]][1], props = c("Hydrophobicity", "Hydrophilicity", "SideChainMass"),lambda = 30, w = 0.05, customprops = NULL)
+}
+PAAC2  <- matrix(nrow = length(x2), ncol = col)
+for (i in 1:length(x2)){
+PAAC2[i,] = extractPAAC(x2[[i]][1], props = c("Hydrophobicity", "Hydrophilicity", "SideChainMass"),lambda = 30, w = 0.05, customprops = NULL)
+}
+PAAC3 <-PAAC1[!duplicated(PAAC1), ]
+PAAC4 <-PAAC2[!duplicated(PAAC2), ]
+
+label =  c(rep("R5",nrow(PAAC3)),rep("X4",nrow(PAAC4)))
+internal = data.frame(rbind(PAAC3,PAAC4),Class = label)
+SVMpara = tune(svm, Class ~ ., data =internal, ranges =list(gamma = 2^(-8:8), cost = 2^(-8:8)),
+tunecontrol = tune.control(sampling = "fix"))
+
+######Loop for 10-fold CV
+k <- 10;
+folds <- cvsegments(nrow(internal), k);
+true <- data.frame()
+label <- data.frame()
+
+for (fold in 1:k){
+  currentFold <- folds[fold][[1]];
+  RF = ksvm(Class~.,data=internal[-currentFold,],kernel="rbfdot", cost = as.numeric(SVMpara$ best.parameters[1]), gamma = as.numeric(SVMpara$ best.parameters[1]),prob.model=TRUE)
+  true = rbind(true, predict(RF, internal[currentFold,],type="prob")[,2])
+  label = rbind(label, internal[currentFold,]$Class)
+  }
+probcv = data.frame(melt(true)[2])
+labelcv = label[,2]
+SVM_paac = cbind(data.frame(melt(true)[2]),label[,2])
+
+########################### SVM-RSCU
+R5 <- read.fasta("CCR5 nlu.fasta",seqtype="DNA")
+X4 <- read.fasta("CXCR4 nlu.fasta",seqtype="DNA")
+
+codonR5  <- matrix(nrow = length(R5), ncol = 64)
+codonX4  <- matrix(nrow = length(X4), ncol = 64)
+
+for(i in 1:length(R5)){ 
+codonR5[i,] = uco( R5[[i]], index = "rscu",NA.rscu = 0)
+}
+
+for(i in 1:length(X4)){ 
+codonX4[i,] = uco( X4[[i]], index = "rscu",NA.rscu = 0)
+}
+
+codonR5_1 <-codonR5[!duplicated(codonR5), ]
+codonX4_1 <-codonX4[!duplicated(codonX4), ]
+
+label =  c(rep("R5",nrow(codonR5_1)),rep("X4",nrow(codonX4_1)))
+internal = data.frame(rbind(codonR5_1,codonX4_1),Class = label)
+SVMpara = tune(svm, Class ~ ., data =internal, ranges =list(gamma = 2^(-8:8), cost = 2^(-8:8)),
+tunecontrol = tune.control(sampling = "fix"))
+
+######Loop for 10-fold CV
+k <- 10;
+folds <- cvsegments(nrow(internal), k);
+true <- data.frame()
+label <- data.frame()
+
+for (fold in 1:k){
+  currentFold <- folds[fold][[1]];
+  RF = ksvm(Class~.,data=internal[-currentFold,],kernel="rbfdot", cost = as.numeric(SVMpara$ best.parameters[1]), gamma = as.numeric(SVMpara$ best.parameters[1]),prob.model=TRUE)
+  true = rbind(true, predict(RF, internal[currentFold,],type="prob")[,2])
+  label = rbind(label, internal[currentFold,]$Class)
+  }
+probcv = data.frame(melt(true)[2])
+labelcv = label[,2]
+SVM_rscu = cbind(data.frame(melt(true)[2]),label[,2])
 
