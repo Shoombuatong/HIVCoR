@@ -55,8 +55,6 @@ for (fold in 1:k){
   label = rbind(label, internal[currentFold,]$Class)
   }
 probcv= data.frame(melt(true)[,2])[,1]
-write.csv(as.matrix(melt(label)$value), "matrix.csv", row.names=TRUE, na="")
-label = read.csv("matrix.csv", header = TRUE)
 labelcv = label[,2]
 
 RF_aac = cbind(probcv,labelcv)
@@ -92,8 +90,6 @@ for (fold in 1:k){
   label = rbind(label, internal[currentFold,]$Class)
   }
 probcv= data.frame(melt(true)[,2])[,1]
-write.csv(as.matrix(melt(label)$value), "matrix.csv", row.names=TRUE, na="")
-label = read.csv("matrix.csv", header = TRUE)
 labelcv = label[,2]
 
 RF_paac = cbind(probcv,labelcv)
@@ -134,8 +130,6 @@ for (fold in 1:k){
   label = rbind(label, internal[currentFold,]$Class)
   }
 probcv= data.frame(melt(true)[,2])[,1]
-write.csv(as.matrix(melt(label)$value), "matrix.csv", row.names=TRUE, na="")
-label = read.csv("matrix.csv", header = TRUE)
 labelcv = label[,2]
 
 RF_rscu = cbind(probcv,labelcv)
@@ -166,9 +160,10 @@ for (fold in 1:k){
   true = rbind(true, predict(RF, internal[currentFold,],type="prob")[,2])
   label = rbind(label, internal[currentFold,]$Class)
   }
-probcv = data.frame(melt(true)[2])
+probcv= data.frame(melt(true)[,2])[,1]
 labelcv = label[,2]
-SVM_aac = cbind(data.frame(melt(true)[2]),label[,2])
+SVM_aac= cbind(probcv,labelcv)
+
 ########################### SVM-PseAAC
 col = 20+ 30
 PAAC1  <- matrix(nrow = length(x1), ncol = col)
@@ -199,9 +194,9 @@ for (fold in 1:k){
   true = rbind(true, predict(RF, internal[currentFold,],type="prob")[,2])
   label = rbind(label, internal[currentFold,]$Class)
   }
-probcv = data.frame(melt(true)[2])
+probcv= data.frame(melt(true)[,2])[,1]
 labelcv = label[,2]
-SVM_paac = cbind(data.frame(melt(true)[2]),label[,2])
+SVM_paac = cbind(probcv,labelcv)
 
 ########################### SVM-RSCU
 R5 <- read.fasta("CCR5 nlu.fasta",seqtype="DNA")
@@ -238,7 +233,7 @@ for (fold in 1:k){
   true = rbind(true, predict(RF, internal[currentFold,],type="prob")[,2])
   label = rbind(label, internal[currentFold,]$Class)
   }
-probcv = data.frame(melt(true)[2])
+probcv= data.frame(melt(true)[,2])[,1]
 labelcv = label[,2]
-SVM_rscu = cbind(data.frame(melt(true)[2]),label[,2])
+SVM_rscu= cbind(probcv,labelcv)
 
